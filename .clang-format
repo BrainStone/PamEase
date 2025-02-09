@@ -1,0 +1,16 @@
+---
+BasedOnStyle: Google
+AccessModifierOffset: -4
+AllowShortBlocksOnASingleLine: Never
+AllowShortFunctionsOnASingleLine: Empty
+ColumnLimit: 120
+DerivePointerAlignment: false
+IndentCaseLabels: false
+IndentWidth: 4
+PointerAlignment: Left
+SortIncludes: CaseInsensitive
+SortUsingDeclarations: true
+TabWidth: 4
+UseTab: ForIndentation
+
+...
