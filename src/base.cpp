@@ -13,7 +13,7 @@ std::pair<std::string, std::string> getLoginCredentials(pam_handle_t* pamh) {
 	}
 
 	// Retrieve password
-	if (pam_get_authtok(pamh, PAM_AUTHTOK, &password, NULL) != PAM_SUCCESS) {
+	if (pam_get_authtok(pamh, PAM_AUTHTOK, &password, nullptr) != PAM_SUCCESS) {
 		// return PAM_AUTH_ERR;
 	}
 

@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.16)
 project(PamEase CXX)
 
+option(ENABLE_PEDANTIC_WARNINGS "Enable strict warnings" ON)
+option(TREAT_WARNINGS_AS_ERRORS "Treat all warnings as errors" ON)
+
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
@@ -20,6 +23,22 @@ set(PAM_MODULE_DIR "${CMAKE_INSTALL_PREFIX}/lib/x86_64-linux-gnu/security")
 
 # Ensure src directory is included for module compilation
 include_directories(${SRC_DIR})
+
+if (ENABLE_PEDANTIC_WARNINGS)
+    if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang|AppleClang")
+        add_compile_options(-Wall -Wextra -Wpedantic)
+    elseif (CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
+        add_compile_options(/W4)
+    endif ()
+endif ()
+
+if (TREAT_WARNINGS_AS_ERRORS)
+    if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang|AppleClang")
+        add_compile_options(-Werror)
+    elseif (CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
+        add_compile_options(/WX)
+    endif ()
+endif ()
 
 # Create a shared library for each module
 foreach (SOURCE_FILE ${MODULE_SOURCES})
