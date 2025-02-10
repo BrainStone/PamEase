@@ -7,6 +7,8 @@
 #include <utility>
 #include <functional>
 
+#define PAM_EXPORT extern "C" __attribute__((visibility("default"))) [[maybe_unused]]
+
 namespace pam_ease {
 
 int handle_pam_exceptions(const std::function<int()>& func);
