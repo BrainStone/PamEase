@@ -7,6 +7,7 @@ option(TREAT_WARNINGS_AS_ERRORS "Treat all warnings as errors" ON)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
 set(CMAKE_VERBOSE_MAKEFILE ON CACHE BOOL "ON" FORCE)
 
 set(SRC_DIR "${CMAKE_SOURCE_DIR}/src")
@@ -42,6 +43,15 @@ if (TREAT_WARNINGS_AS_ERRORS)
     elseif (CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
         add_compile_options(/WX)
     endif ()
+endif ()
+
+# Remove unused objects
+if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang|AppleClang")
+    add_compile_options(-ffunction-sections -fdata-sections)
+    add_link_options(-Wl,--gc-sections)
+elseif (CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
+    add_compile_options(/Gy)
+    add_link_options(/OPT:REF /OPT:ICF)
 endif ()
 
 # Create a shared library for each module
