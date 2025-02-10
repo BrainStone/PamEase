@@ -30,29 +30,16 @@ set(PAM_MODULE_DIR "${CMAKE_INSTALL_PREFIX}/lib/${CMAKE_LIBRARY_ARCHITECTURE}/se
 include_directories(${SRC_DIR})
 
 if (ENABLE_PEDANTIC_WARNINGS)
-    if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang|AppleClang")
-        add_compile_options(-Wall -Wextra -Wpedantic)
-    elseif (CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
-        add_compile_options(/W4)
-    endif ()
+    add_compile_options(-Wall -Wextra -Wpedantic)
 endif ()
 
 if (TREAT_WARNINGS_AS_ERRORS)
-    if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang|AppleClang")
-        add_compile_options(-Werror)
-    elseif (CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
-        add_compile_options(/WX)
-    endif ()
+    add_compile_options(-Werror)
 endif ()
 
 # Remove unused objects
-if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang|AppleClang")
-    add_compile_options(-ffunction-sections -fdata-sections)
-    add_link_options(-Wl,--gc-sections)
-elseif (CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
-    add_compile_options(/Gy)
-    add_link_options(/OPT:REF /OPT:ICF)
-endif ()
+add_compile_options(-ffunction-sections -fdata-sections)
+add_link_options(-Wl,--gc-sections)
 
 # Create a shared library for each module
 foreach (SOURCE_FILE ${MODULE_SOURCES})
