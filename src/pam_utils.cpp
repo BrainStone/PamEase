@@ -14,12 +14,13 @@ int handle_pam_exceptions(const std::function<int()>& func) {
 	try {
 		// Execute the provided code.
 		return func();
-	} catch (pam_ease::pam_exception& e) {
+	} catch (const pam_ease::pam_exception& e) {
 		if (e.has_message()) std::cerr << "Error in " << pam_ease::get_so_name() << ": " << e.what() << std::endl;
 
 		return e.pam_code();
-	} catch (std::exception& e) {
-		std::cerr << "Unexpected error in " << pam_ease::get_so_name() << ": " << e.what() << std::endl;
+	} catch (const std::exception& e) {
+		std::cerr << "Unexpected error in " << pam_ease::get_so_name() << ": " << pam_ease::get_unmangled_type_name(e)
+		          << ": " << e.what() << std::endl;
 
 		return PAM_SERVICE_ERR;
 	} catch (...) {
