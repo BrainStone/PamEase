@@ -41,11 +41,12 @@ endif ()
 add_compile_options(-ffunction-sections -fdata-sections)
 add_link_options(-Wl,--gc-sections)
 
+add_library(utility_objs OBJECT ${UTILITY_SOURCES})
+
 # Create a shared library for each module
 foreach (SOURCE_FILE ${MODULE_SOURCES})
     get_filename_component(MODULE_NAME ${SOURCE_FILE} NAME_WE)
-    add_library(${MODULE_NAME}_objs OBJECT ${UTILITY_SOURCES})
-    add_library(${MODULE_NAME} SHARED ${SOURCE_FILE} $<TARGET_OBJECTS:${MODULE_NAME}_objs>)
+    add_library(${MODULE_NAME} SHARED ${SOURCE_FILE} $<TARGET_OBJECTS:utility_objs>)
 
     set_target_properties(${MODULE_NAME} PROPERTIES
             PREFIX "pam_" # No "lib" prefix, and ensure pam_ prefix
