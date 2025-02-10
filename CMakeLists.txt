@@ -42,6 +42,7 @@ add_compile_options(-ffunction-sections -fdata-sections)
 add_link_options(-Wl,--gc-sections)
 
 add_library(utility_objs OBJECT ${UTILITY_SOURCES})
+target_compile_options(utility_objs PRIVATE -fvisibility=hidden)
 target_link_libraries(utility_objs PRIVATE pam dl)
 
 # Create a shared library for each module
