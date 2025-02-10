@@ -59,3 +59,6 @@ foreach (SOURCE_FILE ${MODULE_SOURCES})
     # Install directive
     install(TARGETS ${MODULE_NAME} DESTINATION "${PAM_MODULE_DIR}" COMPONENT Runtime)
 endforeach ()
+
+# Extra dependencies
+target_link_libraries(fuzzy PRIVATE crypt)
