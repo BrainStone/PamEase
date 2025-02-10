@@ -2,7 +2,8 @@
 
 #include <security/_pam_types.h>
 
-#include <string>
+#include <optional>
+#include <string_view>
 #include <utility>
 
-std::pair<std::string, std::string> getLoginCredentials(pam_handle_t* pamh);
+std::pair<std::string_view, std::optional<std::string_view>> getLoginCredentials(pam_handle_t* pamh);

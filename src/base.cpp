@@ -3,7 +3,7 @@
 #include <security/pam_ext.h>
 #include <security/pam_modules.h>
 
-std::pair<std::string, std::string> getLoginCredentials(pam_handle_t* pamh) {
+std::pair<std::string_view, std::optional<std::string_view>> getLoginCredentials(pam_handle_t* pamh) {
 	const char* username;
 	const char* password;
 
@@ -17,5 +17,5 @@ std::pair<std::string, std::string> getLoginCredentials(pam_handle_t* pamh) {
 		// return PAM_AUTH_ERR;
 	}
 
-	return {username, password};
+	return {username, (password == nullptr) ? std::nullopt : std::make_optional(password)};
 }

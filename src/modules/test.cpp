@@ -10,7 +10,9 @@ extern "C" int pam_sm_authenticate(pam_handle_t* pamh, [[maybe_unused]] int flag
                                    [[maybe_unused]] const char** argv) {
 	auto auth = getLoginCredentials(pamh);
 
-	std::cerr << "Username: " << auth.first << " - Password: " << auth.second << std::endl;
+	std::clog << "Username: " << auth.first;
+	if (auth.second) std::clog << " - Password: " << *auth.second;
+	std::clog << std::endl;
 
 	return PAM_IGNORE;
 }
