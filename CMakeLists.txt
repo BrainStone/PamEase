@@ -1,0 +1,42 @@
+cmake_minimum_required(VERSION 3.16)
+project(PamEase CXX)
+
+set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+set(CMAKE_VERBOSE_MAKEFILE ON CACHE BOOL "ON" FORCE)
+
+set(SRC_DIR "${CMAKE_SOURCE_DIR}/src")
+set(MODULES_DIR "${SRC_DIR}/modules")
+
+file(GLOB UTILITY_SOURCES "${SRC_DIR}/*.cpp")
+file(GLOB MODULE_SOURCES "${MODULES_DIR}/*.cpp")
+
+# Allow setting installation prefix
+if (NOT DEFINED CMAKE_INSTALL_PREFIX)
+    set(CMAKE_INSTALL_PREFIX "/usr")
+endif ()
+set(PAM_MODULE_DIR "${CMAKE_INSTALL_PREFIX}/lib/x86_64-linux-gnu/security")
+
+# Ensure src directory is included for module compilation
+include_directories(${SRC_DIR})
+
+# Create a shared library for each module
+foreach (SOURCE_FILE ${MODULE_SOURCES})
+    get_filename_component(MODULE_NAME ${SOURCE_FILE} NAME_WE)
+    add_library(${MODULE_NAME}_objs OBJECT ${UTILITY_SOURCES})
+    add_library(${MODULE_NAME} SHARED ${SOURCE_FILE} $<TARGET_OBJECTS:${MODULE_NAME}_objs>)
+
+    set_target_properties(${MODULE_NAME} PROPERTIES
+            PREFIX "pam_"  # No "lib" prefix
+            SUFFIX ".so" # Ensure .so suffix
+    )
+
+    target_link_libraries(${MODULE_NAME} PRIVATE pam)
+
+    # Install directive
+    install(TARGETS ${MODULE_NAME} DESTINATION "${PAM_MODULE_DIR}" COMPONENT Runtime)
+endforeach ()
+
+# Define installation target
+install(TARGETS ${MODULE_NAME} DESTINATION "${PAM_MODULE_DIR}")
