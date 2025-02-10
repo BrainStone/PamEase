@@ -1,6 +1,7 @@
 #include <security/pam_appl.h>
 #include <security/pam_modules.h>
 
+#include <cstring>
 #include <iostream>
 
 #include "pam_exception.hpp"
@@ -19,7 +20,9 @@ extern "C" [[maybe_unused]] int pam_sm_authenticate(pam_handle_t* pamh, [[maybe_
 
 		return PAM_IGNORE;
 	} catch (pam_ease::pam_exception& e) {
-		std::cerr << "Error in " << pam_ease::get_so_name() << ": " << e.what() << std::endl;
+		const char* what = e.what();
+
+		if (strcmp("", what) != 0) std::cerr << "Error in " << pam_ease::get_so_name() << ": " << what << std::endl;
 
 		return e.pam_code();
 	} catch (std::exception& e) {

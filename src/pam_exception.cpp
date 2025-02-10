@@ -2,6 +2,8 @@
 
 namespace pam_ease {
 
+pam_exception::pam_exception(int pam_code) : std::runtime_error{""}, _pam_code{pam_code} {}
+
 pam_exception::pam_exception(int pam_code, const std::string& what_arg)
     : std::runtime_error{what_arg}, _pam_code{pam_code} {}
 

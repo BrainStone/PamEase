@@ -11,6 +11,7 @@ protected:
 	int _pam_code;
 
 public:
+	explicit pam_exception(int pam_code);
 	pam_exception(int pam_code, const std::string& what_arg);
 	pam_exception(int pam_code, const char* what_arg);
 

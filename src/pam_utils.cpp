@@ -18,7 +18,9 @@ std::pair<std::string_view, std::optional<std::string_view>> getLoginCredentials
 
 	// Retrieve password
 	if (pam_get_authtok(pamh, PAM_AUTHTOK, &password, nullptr) != PAM_SUCCESS) {
-		throw pam_exception(PAM_CRED_UNAVAIL, "Can't determine authtok");
+		// No message, because canceling the login attempt, causes this function fail, which is ok. We just fail the
+		// auth attempt and move on.
+		throw pam_exception(PAM_AUTH_ERR);
 	}
 
 	return {username, (password == nullptr) ? std::nullopt : std::make_optional(password)};
