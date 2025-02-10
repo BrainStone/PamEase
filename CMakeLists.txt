@@ -47,8 +47,8 @@ foreach (SOURCE_FILE ${MODULE_SOURCES})
     add_library(${MODULE_NAME} SHARED ${SOURCE_FILE} $<TARGET_OBJECTS:${MODULE_NAME}_objs>)
 
     set_target_properties(${MODULE_NAME} PROPERTIES
-            PREFIX "pam_"  # No "lib" prefix
-            SUFFIX ".so" # Ensure .so suffix
+            PREFIX "pam_" # No "lib" prefix, and ensure pam_ prefix
+            SUFFIX ".so"  # Ensure .so suffix
     )
 
     target_link_libraries(${MODULE_NAME} PRIVATE pam)
