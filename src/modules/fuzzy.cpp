@@ -9,7 +9,7 @@
 extern "C" [[maybe_unused]] int pam_sm_authenticate(pam_handle_t* pamh, [[maybe_unused]] int flags,
                                                     [[maybe_unused]] int argc, [[maybe_unused]] const char** argv) {
 	return pam_ease::handle_pam_exceptions([&]() -> int {
-		auto auth = pam_ease::getLoginCredentials(pamh);
+		auto auth = pam_ease::get_login_credentials(pamh);
 
 		std::clog << "Username: " << auth.first;
 		if (auth.second) std::clog << " - Password: " << *auth.second;

@@ -30,7 +30,7 @@ int handle_pam_exceptions(const std::function<int()>& func) {
 	}
 }
 
-std::pair<std::string_view, std::optional<std::string_view>> getLoginCredentials(pam_handle_t* pamh) {
+std::pair<std::string_view, std::optional<std::string_view>> get_login_credentials(pam_handle_t* pamh) {
 	const char* username;
 	const char* password;
 
