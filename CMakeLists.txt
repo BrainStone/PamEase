@@ -19,7 +19,11 @@ file(GLOB MODULE_SOURCES "${MODULES_DIR}/*.cpp")
 if (NOT DEFINED CMAKE_INSTALL_PREFIX)
     set(CMAKE_INSTALL_PREFIX "/usr")
 endif ()
-set(PAM_MODULE_DIR "${CMAKE_INSTALL_PREFIX}/lib/x86_64-linux-gnu/security")
+# And the arch dir
+if (NOT DEFINED CMAKE_LIBRARY_ARCHITECTURE)
+    set(CMAKE_LIBRARY_ARCHITECTURE "x86_64-linux-gnu")
+endif ()
+set(PAM_MODULE_DIR "${CMAKE_INSTALL_PREFIX}/lib/${CMAKE_LIBRARY_ARCHITECTURE}/security")
 
 # Ensure src directory is included for module compilation
 include_directories(${SRC_DIR})
@@ -56,6 +60,3 @@ foreach (SOURCE_FILE ${MODULE_SOURCES})
     # Install directive
     install(TARGETS ${MODULE_NAME} DESTINATION "${PAM_MODULE_DIR}" COMPONENT Runtime)
 endforeach ()
-
-# Define installation target
-install(TARGETS ${MODULE_NAME} DESTINATION "${PAM_MODULE_DIR}")
