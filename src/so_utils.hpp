@@ -4,6 +4,8 @@
 #include <string>
 #include <typeinfo>
 
+#define MODULE_LOG(stream) stream << pam_ease::get_so_name() << ": "
+
 namespace pam_ease {
 
 std::filesystem::path get_so_path(void* func = nullptr);

@@ -13,8 +13,8 @@ set(CMAKE_VERBOSE_MAKEFILE ON CACHE BOOL "ON" FORCE)
 set(SRC_DIR "${CMAKE_SOURCE_DIR}/src")
 set(MODULES_DIR "${SRC_DIR}/modules")
 
-file(GLOB UTILITY_SOURCES "${SRC_DIR}/*.cpp")
-file(GLOB MODULE_SOURCES "${MODULES_DIR}/*.cpp")
+file(GLOB UTILITY_SOURCES "${SRC_DIR}/*.cpp" "${SRC_DIR}/*.hpp" "${SRC_DIR}/*.inc")
+file(GLOB MODULE_SOURCES "${MODULES_DIR}/*.cpp" "${MODULES_DIR}/*.hpp" "${MODULES_DIR}/*.inc")
 
 # Allow setting installation prefix
 if (NOT DEFINED CMAKE_INSTALL_PREFIX)

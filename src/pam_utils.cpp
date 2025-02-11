@@ -15,16 +15,17 @@ int handle_pam_exceptions(const std::function<int()>& func) {
 		// Execute the provided code.
 		return func();
 	} catch (const pam_ease::pam_exception& e) {
-		if (e.has_message()) std::cerr << "Error in " << pam_ease::get_so_name() << ": " << e.what() << std::endl;
+		// We're using `std::endl` here (and in all further catch blocks) on purpose to flush the stream before exiting
+		if (e.has_message()) MODULE_LOG(std::cerr) << "Error: " << e.what() << std::endl;
 
 		return e.pam_code();
 	} catch (const std::exception& e) {
-		std::cerr << "Unexpected error in " << pam_ease::get_so_name() << ": " << pam_ease::get_unmangled_type_name(e)
-		          << ": " << e.what() << std::endl;
+		MODULE_LOG(std::cerr) << "Unexpected error: " << pam_ease::get_unmangled_type_name(e) << ": " << e.what()
+		                      << std::endl;
 
 		return PAM_SERVICE_ERR;
 	} catch (...) {
-		std::cerr << "Unknown error in " << pam_ease::get_so_name() << std::endl;
+		MODULE_LOG(std::cerr) << "Unknown error" << std::endl;
 
 		return PAM_SERVICE_ERR;
 	}
