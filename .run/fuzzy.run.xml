@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="fuzzy" type="CMakeRunConfiguration" factoryName="Application" PROGRAM_PARAMS="login $OSUser$ authenticate" REDIRECT_INPUT="false" ELEVATE="true" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="PamEase" TARGET_NAME="fuzzy" CONFIG_NAME="Debug" RUN_PATH="/usr/bin/pamtester">
+  <configuration default="false" name="fuzzy" type="CMakeRunConfiguration" factoryName="Application" PROGRAM_PARAMS="kde $OSUser$ authenticate" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="PamEase" TARGET_NAME="fuzzy" CONFIG_NAME="Debug" RUN_PATH="/usr/bin/pamtester">
     <method v="2">
       <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       <option name="CMake.Install" enabled="true" />

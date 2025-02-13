@@ -4,6 +4,7 @@
 #include <shadow.h>
 
 #include <atomic>
+#include <boost/process.hpp>
 #include <generator>
 #include <iomanip>
 #include <iostream>
@@ -26,11 +27,24 @@ constexpr bool debug = false;
 constexpr std::string_view ALLOWED_CHARS =
     "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_=+[]{};:'\",.<>?/\\|`~";
 
-bool check_password(std::string_view password, std::string_view stored_hash) {
+bool check_password_with_hash(std::string_view stored_hash, std::string_view password) {
 	thread_local crypt_data data{};
 
 	char* computed_hash = crypt_r(password.data(), stored_hash.data(), &data);
 	return computed_hash != nullptr && computed_hash == stored_hash;
+}
+
+bool check_password_with_unix_chkpwd(std::string_view user, std::string_view password) {
+	boost::process::opstream child_in;
+	boost::process::child proc("/usr/sbin/unix_chkpwd", user.data(), "nonull",
+	                           boost::process::std_in<child_in, boost::process::std_out> boost::process::null,
+	                           boost::process::std_err > boost::process::null);
+
+	child_in.pipe().write(password.data(), static_cast<boost::process::pipe::int_type>(password.size() + 1));
+	child_in.pipe().close();
+
+	proc.wait();
+	return proc.exit_code() == PAM_SUCCESS;
 }
 
 std::generator<std::string> levenshtein_variants(std::string_view password) {
@@ -93,13 +107,13 @@ std::generator<std::string> levenshtein_variants(std::string_view password) {
 	}
 }
 
-void worker_function(pam_ease::sync_generator<std::string>& generator, std::string_view stored_hash,
-                     std::atomic<bool>& found) {
+void worker_function(pam_ease::sync_generator<std::string>& generator, std::atomic<bool>& found,
+                     const std::function<bool(std::string_view)>& password_checker) {
 	while (!found.load(std::memory_order_relaxed)) {
-		auto password_opt = generator.next();
-		if (!password_opt) break;
+		auto password = generator.next();
+		if (!password) break;
 
-		if (check_password(*password_opt, stored_hash)) {
+		if (password_checker(*password)) {
 			found.store(true, std::memory_order_relaxed);
 			break;
 		}
@@ -128,16 +142,25 @@ PAM_EXPORT int pam_sm_authenticate(pam_handle_t* pamh, [[maybe_unused]] int flag
 
 		std::string_view& username = auth.first;
 		std::string_view& password = *auth.second;
+		std::function<bool(std::string_view)> password_checker;
 
-		struct spwd* shadow_entry;
-		shadow_entry = getspnam(username.data());
-		if (!shadow_entry || !shadow_entry->sp_pwdp) {
-			throw pam_ease::pam_exception(PAM_CRED_UNAVAIL,
-			                              "Can't determine hashed password of user "s + username.data());
+		{
+			struct spwd* shadow_entry;
+			shadow_entry = getspnam(username.data());
+			if (shadow_entry && shadow_entry->sp_pwdp) {
+				std::string_view stored_hash = shadow_entry->sp_pwdp;
+
+				password_checker = [stored_hash](std::string_view&& pasword) {
+					return check_password_with_hash(stored_hash, std::forward<std::string_view>(pasword));
+				};
+			} else {
+				password_checker = [username](std::string_view&& pasword) {
+					return check_password_with_unix_chkpwd(username, std::forward<std::string_view>(pasword));
+				};
+			}
 		}
-		std::string_view stored_hash = shadow_entry->sp_pwdp;
 
-		if (check_password(password, stored_hash)) {
+		if (password_checker(password)) {
 			if (time) MODULE_LOG(std::clog) << "Password matched directly.\n";
 
 			return PAM_SUCCESS;
@@ -150,7 +173,7 @@ PAM_EXPORT int pam_sm_authenticate(pam_handle_t* pamh, [[maybe_unused]] int flag
 
 		threads.reserve(thread_count);
 		for (std::size_t i = 0; i < thread_count; ++i) {
-			threads.emplace_back(worker_function, std::ref(generator), stored_hash, std::ref(found));
+			threads.emplace_back(worker_function, std::ref(generator), std::ref(found), password_checker);
 		}
 
 		for (std::thread& thread : threads) {

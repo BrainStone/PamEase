@@ -6,11 +6,11 @@ Pam modules to make your logging-in experience better
 
 ### Dependencies
 
-This project requires the pam dev files.  
-For Ubuntu you can use this command
+This project requires the pam dev files as well as the boost base dev files.  
+For Ubuntu you can use this command:
 
 ```console
-sudo apt-get install libpam0g-dev
+sudo apt-get install libpam0g-dev libboost-dev
 ```
 
 ### CMake
