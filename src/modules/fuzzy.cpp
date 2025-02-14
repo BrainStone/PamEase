@@ -24,8 +24,8 @@ constexpr bool debug = true;
 constexpr bool debug = false;
 #endif
 
-constexpr std::string_view ALLOWED_CHARS =
-    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_=+[]{};:'\",.<>?/\\|`~";
+constexpr std::string_view CHAR_GROUPS[] = {"ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz", "0123456789",
+                                            "!@#$%^&*()-_=+[]{};:'\",.<>?/\\|`~"};
 
 bool check_password_with_hash(std::string_view stored_hash, std::string_view password) {
 	thread_local crypt_data data{};
@@ -68,41 +68,45 @@ std::generator<std::string> levenshtein_variants(std::string_view password) {
 		}
 	}
 
-	// Substitutions
-	{
-		variant = password;
+	for (const auto& chars_to_check : CHAR_GROUPS) {
+		// Substitutions
+		{
+			variant = password;
 
-		const auto v_end = variant.end();
-		for (auto v_it = variant.begin(); v_it != v_end; ++v_it) {
-			char original = *v_it;
+			const auto v_end = variant.end();
+			for (auto v_it = variant.begin(); v_it != v_end; ++v_it) {
+				char original = *v_it;
 
-			for (char c : ALLOWED_CHARS) {
-				if (original != c) {
+				for (char c : chars_to_check) {
+					if (original == c) [[unlikely]]
+						continue;
+
 					*v_it = c;
 
 					co_yield variant;
 				}
-			}
 
-			*v_it = original;
+				*v_it = original;
+			}
 		}
-	}
 
-	// Insertions
-	{
-		variant.resize(password.size() + 1);
+		// Insertions
+		{
+			variant.resize(password.size() + 1);
 
-		const auto v_end = variant.rend();
-		auto v_it = variant.rbegin();
-		while (true) {
-			for (char c : ALLOWED_CHARS) {
-				*v_it = c;
+			const auto v_end = variant.rend();
+			auto v_it = variant.rbegin();
+			while (true) {
+				for (char c : chars_to_check) {
+					*v_it = c;
 
-				co_yield variant;
+					co_yield variant;
+				}
+
+				if (++v_it == v_end) [[unlikely]]
+					break;
+				*(v_it - 1) = *v_it;
 			}
-
-			if (++v_it == v_end) break;
-			*(v_it - 1) = *v_it;
 		}
 	}
 }
