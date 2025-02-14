@@ -23,7 +23,7 @@ guide:
 cmake -B build
 # Useful options:
 #   - `-D CMAKE_BUILD_TYPE=Release`: Specify the build type. This defaults to Debug, so if you
-#     want to use the project in, specify it as Release.
+#     want to use the project in production/a live system, specify it as Release.
 #   - `-D CMAKE_INSTALL_PREFIX=/usr`: Specifies the install prefix. For productive use, set it
 #     to `/usr`.
 #   - `-D CMAKE_CXX_COMPILER=g++-14`: Specifies the compiler. GCC 14 or above is required. Not
