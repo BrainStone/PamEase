@@ -12,9 +12,13 @@ set(CMAKE_VERBOSE_MAKEFILE ON CACHE BOOL "ON" FORCE)
 
 set(SRC_DIR "${CMAKE_SOURCE_DIR}/src")
 set(MODULES_DIR "${SRC_DIR}/modules")
+set(RESOURCES_DIR "${CMAKE_SOURCE_DIR}/resources")
+# PAU = pam-auth-update
+set(PAU_PROFILES_DIR "${RESOURCES_DIR}/pam-auth-update")
 
 file(GLOB UTILITY_SOURCES "${SRC_DIR}/*.cpp" "${SRC_DIR}/*.hpp" "${SRC_DIR}/*.inc")
 file(GLOB MODULE_SOURCES "${MODULES_DIR}/*.cpp" "${MODULES_DIR}/*.hpp" "${MODULES_DIR}/*.inc")
+file(GLOB PAU_PROFILE_SOURCES "${PAU_PROFILES_DIR}/*.conf")
 
 # Allow setting installation prefix
 if (NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -57,7 +61,14 @@ foreach (SOURCE_FILE ${MODULE_SOURCES})
     target_link_libraries(${MODULE_NAME} PRIVATE pam)
 
     # Install directive
-    install(TARGETS ${MODULE_NAME} DESTINATION "${PAM_MODULE_DIR}" COMPONENT Runtime)
+    install(TARGETS ${MODULE_NAME} DESTINATION "${PAM_MODULE_DIR}" COMPONENT pam_fuzzy)
+endforeach ()
+
+# Create pam-auth-update profile file for each PAM module
+foreach (PAU_PROFILE ${PAU_PROFILE_SOURCES})
+    get_filename_component(PROFILE_NAME "${PAU_PROFILE}" NAME_WE)
+    
+    install(FILES "${PAU_PROFILE}" DESTINATION /usr/share/pam-configs RENAME "${PROFILE_NAME}" COMPONENT "pam_${PROFILE_NAME}")
 endforeach ()
 
 # Extra dependencies
