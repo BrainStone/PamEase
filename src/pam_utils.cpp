@@ -50,4 +50,10 @@ std::pair<std::string_view, std::optional<std::string_view>> get_login_credentia
 	return {username, (password == nullptr) ? std::nullopt : std::make_optional(password)};
 }
 
+void set_password(pam_handle_t* pamh, std::string_view password) {
+	if (pam_set_item(pamh, PAM_AUTHTOK, password.data()) != PAM_SUCCESS) {
+		throw pam_exception(PAM_AUTH_ERR, "Updating the PAM_AUTHTOK failed!");
+	}
+}
+
 }  // namespace pam_ease

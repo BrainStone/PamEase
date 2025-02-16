@@ -67,7 +67,7 @@ endforeach ()
 # Create pam-auth-update profile file for each PAM module
 foreach (PAU_PROFILE ${PAU_PROFILE_SOURCES})
     get_filename_component(PROFILE_NAME "${PAU_PROFILE}" NAME_WE)
-    
+
     install(FILES "${PAU_PROFILE}" DESTINATION /usr/share/pam-configs RENAME "${PROFILE_NAME}" COMPONENT "pam_${PROFILE_NAME}")
 endforeach ()
 

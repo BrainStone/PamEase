@@ -112,13 +112,14 @@ std::generator<std::string> levenshtein_variants(std::string_view password) {
 }
 
 void worker_function(pam_ease::sync_generator<std::string>& generator, std::atomic<bool>& found,
-                     const std::function<bool(std::string_view)>& password_checker) {
+                     std::string& corrected_password, const std::function<bool(std::string_view)>& password_checker) {
 	while (!found.load(std::memory_order_relaxed)) {
 		auto password = generator.next();
 		if (!password) break;
 
 		if (password_checker(*password)) {
 			found.store(true, std::memory_order_relaxed);
+			corrected_password = std::move(*password);
 			break;
 		}
 	}
@@ -137,6 +138,10 @@ PAM_EXPORT int pam_sm_authenticate(pam_handle_t* pamh, [[maybe_unused]] int flag
 		// Check if the password is set
 		if (!auth.second) {
 			if (time) MODULE_LOG(std::clog) << "No password set!\n";
+
+			return PAM_AUTH_ERR;
+		} else if (auth.second->empty()) {
+			if (time) MODULE_LOG(std::clog) << "Empty password set!\n";
 
 			return PAM_AUTH_ERR;
 		}
@@ -172,12 +177,14 @@ PAM_EXPORT int pam_sm_authenticate(pam_handle_t* pamh, [[maybe_unused]] int flag
 
 		const std::size_t thread_count = std::thread::hardware_concurrency();
 		std::atomic<bool> found{false};
+		std::string corrected_password;
 		std::vector<std::thread> threads;
 		pam_ease::sync_generator<std::string> generator{levenshtein_variants(password)};
 
 		threads.reserve(thread_count);
 		for (std::size_t i = 0; i < thread_count; ++i) {
-			threads.emplace_back(worker_function, std::ref(generator), std::ref(found), password_checker);
+			threads.emplace_back(worker_function, std::ref(generator), std::ref(found), std::ref(corrected_password),
+			                     password_checker);
 		}
 
 		for (std::thread& thread : threads) {
@@ -193,7 +200,13 @@ PAM_EXPORT int pam_sm_authenticate(pam_handle_t* pamh, [[maybe_unused]] int flag
 			                      << " find a matching password.\n";
 		}
 
-		return found.load() ? PAM_SUCCESS : PAM_AUTH_ERR;
+		if (found.load()) {
+			pam_ease::set_password(pamh, corrected_password);
+
+			return PAM_SUCCESS;
+		} else {
+			return PAM_AUTH_ERR;
+		}
 	});
 }
 
